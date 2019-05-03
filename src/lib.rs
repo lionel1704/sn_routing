@@ -102,7 +102,7 @@
 )]
 #![deny(
     bad_style, deprecated, improper_ctypes, missing_docs, non_shorthand_field_patterns,
-    overflowing_literals, plugin_as_library, private_no_mangle_fns, private_no_mangle_statics,
+    overflowing_literals, plugin_as_library,
     stable_features, unconditional_recursion, unknown_lints, unsafe_code, unused, unused_allocation,
     unused_attributes, unused_comparisons, unused_features, unused_parens, while_true
 )]

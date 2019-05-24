@@ -147,6 +147,7 @@ impl Stats {
                 Response::PutIData { ref res, .. } => self.msg_put_idata.inc_response(res.is_ok()),
                 Response::GetIData { ref res, .. } => self.msg_get_idata.inc_response(res.is_ok()),
                 Response::PutMData { ref res, .. } => self.msg_put_mdata.inc_response(res.is_ok()),
+                Response::RpcResponse { res: _, .. } => self.msg_put_mdata.inc_response(true),
                 Response::GetMData { ref res, .. } => self.msg_get_mdata.inc_response(res.is_ok()),
                 Response::GetMDataVersion { ref res, .. } => {
                     self.msg_get_mdata_version.inc_response(res.is_ok())

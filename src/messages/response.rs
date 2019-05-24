@@ -40,6 +40,14 @@ pub enum Response {
         msg_id: MsgId,
     },
 
+    /// RpcResponse from Vaults - should be in safe-nd crate
+    RpcResponse {
+        /// Reponse payload
+        res: Result<Vec<u8>, ClientError>,
+        /// Unique message ID
+        msg_id: MsgId
+    },
+
     // --- MutableData ---
     // ==========================
     /// Returns a success or failure status of putting MutableData to the network.
@@ -196,6 +204,7 @@ impl Response {
             | GetIData { ref msg_id, .. }
             | PutMData { ref msg_id, .. }
             | GetMData { ref msg_id, .. }
+            | RpcResponse { ref msg_id, .. }
             | GetMDataVersion { ref msg_id, .. }
             | GetMDataShell { ref msg_id, .. }
             | ListMDataEntries { ref msg_id, .. }

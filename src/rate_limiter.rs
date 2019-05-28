@@ -208,6 +208,7 @@ impl RateLimiter {
                         // We overcharged for these, so we let them through.
                         GetIData { .. }
                         | GetAccountInfo { .. }
+                        | RpcResponse { .. }
                         | GetMData { .. }
                         | GetMDataVersion { .. }
                         | GetMDataShell { .. }

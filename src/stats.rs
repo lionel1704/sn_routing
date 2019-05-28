@@ -76,6 +76,7 @@ pub struct Stats {
     msg_ins_auth_key: UserMessageStats,
     msg_del_auth_key: UserMessageStats,
     msg_get_account_info: UserMessageStats,
+    msg_rpc_reponse: UserMessageStats,
 
     msg_other: usize,
 
@@ -147,6 +148,7 @@ impl Stats {
                 Response::PutIData { ref res, .. } => self.msg_put_idata.inc_response(res.is_ok()),
                 Response::GetIData { ref res, .. } => self.msg_get_idata.inc_response(res.is_ok()),
                 Response::PutMData { ref res, .. } => self.msg_put_mdata.inc_response(res.is_ok()),
+                Response::RpcResponse { ref res, .. } => self.msg_rpc_reponse.inc_response(res.is_ok()),
                 Response::GetMData { ref res, .. } => self.msg_get_mdata.inc_response(res.is_ok()),
                 Response::GetMDataVersion { ref res, .. } => {
                     self.msg_get_mdata_version.inc_response(res.is_ok())

@@ -20,6 +20,7 @@ pub struct FullId {
     public_id: PublicId,
     private_encrypt_key: box_::SecretKey,
     private_sign_key: sign::SecretKey,
+    private_bls_key: threshold_crypto::SecretKey,
 }
 
 impl FullId {
@@ -27,10 +28,12 @@ impl FullId {
     pub fn new() -> FullId {
         let encrypt_keys = box_::gen_keypair();
         let sign_keys = sign::gen_keypair();
+        let private_bls_key = threshold_crypto::SecretKey::random();
         FullId {
             public_id: PublicId::new(encrypt_keys.0, sign_keys.0),
             private_encrypt_key: encrypt_keys.1,
             private_sign_key: sign_keys.1,
+            private_bls_key,
         }
     }
 
@@ -38,12 +41,14 @@ impl FullId {
     pub fn with_keys(
         encrypt_keys: (box_::PublicKey, box_::SecretKey),
         sign_keys: (sign::PublicKey, sign::SecretKey),
+        private_bls_key: threshold_crypto::SecretKey
     ) -> FullId {
         // TODO Verify that pub/priv key pairs match
         FullId {
             public_id: PublicId::new(encrypt_keys.0, sign_keys.0),
             private_encrypt_key: encrypt_keys.1,
             private_sign_key: sign_keys.1,
+            private_bls_key
         }
     }
 
@@ -55,7 +60,8 @@ impl FullId {
             let name = PublicId::name_from_key(&sign_keys.0);
             if name >= *start && name <= *end {
                 let encrypt_keys = box_::gen_keypair();
-                let full_id = FullId::with_keys(encrypt_keys, sign_keys);
+                let private_bls_key = threshold_crypto::SecretKey::random();
+                let full_id = FullId::with_keys(encrypt_keys, sign_keys, private_bls_key);
                 return full_id;
             }
             sign_keys = sign::gen_keypair();
@@ -80,6 +86,11 @@ impl FullId {
     /// Private encryption key.
     pub fn encrypting_private_key(&self) -> &box_::SecretKey {
         &self.private_encrypt_key
+    }
+
+    /// Private BLS key
+    pub fn bls_key(&self) -> &threshold_crypto::SecretKey {
+        &self.private_bls_key
     }
 }
 

@@ -611,8 +611,7 @@ impl PeerManager {
                 new_pub_id: pub_id, ..
             } if pub_id == *new_pub_id =>
             {
-                ()
-            }
+            },
             _ => return Err(RoutingError::UnknownCandidate),
         }
 

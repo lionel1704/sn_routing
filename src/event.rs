@@ -41,6 +41,16 @@ pub enum Event {
         /// The destination authority that receives the response.
         dst: Authority<XorName>,
     },
+    /// Rpc reponse
+    RpcResponse {
+        /// Response payload
+        response: Response,
+        /// The source authority that sent the response.
+        src: Authority<XorName>,
+        /// The destination authority that receives the response.
+        dst: Authority<XorName>,
+    },
+
     /// A node has connected to us.
     NodeAdded(XorName, RoutingTable<XorName>),
     /// A node has disconnected from us.
@@ -74,6 +84,15 @@ impl Debug for Event {
                 request, src, dst
             ),
             Event::Response {
+                ref response,
+                ref src,
+                ref dst,
+            } => write!(
+                formatter,
+                "Event::Response {{ response: {:?}, src: {:?}, dst: {:?} }}",
+                response, src, dst
+            ),
+            Event::RpcResponse {
                 ref response,
                 ref src,
                 ref dst,

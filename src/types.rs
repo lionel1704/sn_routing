@@ -23,9 +23,15 @@ pub type RoutingActionSender = MaidSafeObserver<::action::Action>;
 /// routes, the same message will usually arrive more than once at any given node. A message with
 /// an ID that is already in the cache will be ignored.
 #[derive(Ord, PartialOrd, Debug, Clone, Copy, Eq, PartialEq, Serialize, Deserialize, Hash)]
-pub struct MessageId(XorName);
+pub struct MessageId(pub XorName);
 
 impl MessageId {
+
+    /// Generate a new `MessageId` given an array of bytes for the `XorName` field
+    pub fn from_name_array(name: [u8; 32]) -> MessageId {
+        MessageId(XorName(name))
+    }
+
     /// Generate a new `MessageId` with random content.
     #[cfg(any(test, feature = "use-mock-crust"))]
     pub fn new() -> MessageId {

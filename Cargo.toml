@@ -11,7 +11,7 @@ version = "0.36.0"
 
 [dependencies]
 config_file_handler = "~0.11.0"
-crust = { git = "https://github.com/lionel1704/crust", branch = "version-change" }
+crust = "~0.32.0"
 fake_clock = "~0.2.0"
 hex = "~0.3.1"
 itertools = "~0.7.8"
@@ -21,7 +21,7 @@ maidsafe_utilities = "~0.18.0"
 num-bigint = "~0.1.43"
 quick-error = "~1.2.1"
 rand = "~0.4.2"
-resource_proof = "~0.6.0"
+resource_proof = "~0.7.0"
 rust_sodium = "~0.10.2"
 serde = "~1.0.37"
 serde_derive = "~1.0.37"

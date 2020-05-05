@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["routing"] = [{"text":"impl <a class=\"trait\" href=\"https://rust-random.github.io/rand/rand/distributions/trait.Distribution.html\" title=\"trait rand::distributions::Distribution\">Distribution</a>&lt;<a class=\"struct\" href=\"routing/struct.XorName.html\" title=\"struct routing::XorName\">XorName</a>&gt; for <a class=\"struct\" href=\"https://rust-random.github.io/rand/rand/distributions/struct.Standard.html\" title=\"struct rand::distributions::Standard\">Standard</a>","synthetic":false,"types":["rand::distributions::Standard"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

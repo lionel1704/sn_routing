@@ -38,7 +38,7 @@ rand_xorshift = "~0.2.0"
 safe-network-signature-aggregator = { git = "https://github.com/maidsafe/safe-network-signature-aggregator" }
 serde = { version = "1.0.111", features = ["derive" ,"rc"] }
 tiny-keccak = { version = "2.0.2", features = ["sha3"] }
-xor_name = { git="https://github.com/joshuef/xor-name.git", branch="AddRandom"}
+xor_name = { git = "https://github.com/maidsafe/xor-name.git" }
 
 [dev-dependencies]
 env_logger = "~0.7.1"

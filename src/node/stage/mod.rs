@@ -196,8 +196,8 @@ impl Stage {
     }
 
     /// Returns connection info of this node.
-    pub fn our_connection_info(&self) -> Result<SocketAddr> {
-        self.comm.our_connection_info()
+    pub async fn our_connection_info(&self) -> Result<SocketAddr> {
+        self.comm.our_connection_info().await
     }
 
     /// Returns whether the node is Elder.

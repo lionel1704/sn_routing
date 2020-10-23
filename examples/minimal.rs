@@ -201,6 +201,7 @@ async fn start_node(
 
     let contact_info = node
         .our_connection_info()
+        .await
         .expect("Failed to obtain node's contact info.");
 
     run_node(index, node, event_stream).await;
@@ -225,6 +226,7 @@ async fn handle_event(index: usize, node: &mut Node, event: Event) -> bool {
         Event::Connected(Connected::First) => {
             let contact_info = node
                 .our_connection_info()
+                .await
                 .expect("failed to retrieve node contact info");
 
             info!(

@@ -67,7 +67,7 @@ async fn send_bootstrap_request() -> Result<()> {
 #[tokio::test]
 async fn receive_bootstrap_request() -> Result<()> {
     let comm = create_comm()?;
-    let addr = comm.our_connection_info()?;
+    let addr = comm.our_connection_info().await?;
     let (node_info, _) = create_node_info();
     let state = Approved::first_node(node_info, addr)?;
     let node = Stage::new(state.into(), comm);
@@ -220,7 +220,7 @@ async fn receive_bootstrap_response_rebootstrap() -> Result<()> {
 async fn receive_join_request() -> Result<()> {
     let (node_info, _) = create_node_info();
     let comm = create_comm()?;
-    let addr = comm.our_connection_info()?;
+    let addr = comm.our_connection_info().await?;
     let state = Approved::first_node(node_info, addr)?;
     let node = Stage::new(state.into(), comm);
 
@@ -1097,7 +1097,7 @@ async fn receive_message_with_invalid_proof_chain() -> Result<()> {
 
     let (node_info, _) = create_node_info();
     let comm = create_comm()?;
-    let addr = comm.our_connection_info()?;
+    let addr = comm.our_connection_info().await?;
     let peer = Peer::new(node_info.name(), addr, MIN_AGE);
 
     let chain = SectionProofChain::new(pk0_good);

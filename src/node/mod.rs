@@ -53,10 +53,12 @@ pub struct NodeConfig {
 
 impl Default for NodeConfig {
     fn default() -> Self {
+        let mut transport_config = TransportConfig::default();
+        transport_config.forward_port = true;
         Self {
             first: false,
             keypair: None,
-            transport_config: TransportConfig::default(),
+            transport_config,
             network_params: NetworkParams::default(),
         }
     }
@@ -93,7 +95,7 @@ impl Node {
         let (state, comm, initial_command) = if config.first {
             info!("{} Starting a new network as the seed node.", node_name);
             let comm = Comm::new(config.transport_config)?;
-            let addr = comm.our_connection_info()?;
+            let addr = comm.our_connection_info().await?;
             let state = Approved::first_node(node_info, addr)?;
 
             let _ = event_tx.send(Event::Connected(Connected::First));
@@ -147,8 +149,8 @@ impl Node {
     }
 
     /// Returns connection info of this node.
-    pub fn our_connection_info(&self) -> Result<SocketAddr> {
-        self.stage.our_connection_info()
+    pub async fn our_connection_info(&self) -> Result<SocketAddr> {
+        self.stage.our_connection_info().await
     }
 
     /// Our `Prefix` once we are a part of the section.

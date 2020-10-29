@@ -96,7 +96,7 @@ impl Routing {
             let comm = Comm::new(config.transport_config)?;
             let incoming_msgs = comm.listen()?;
 
-            let node = Node::new(keypair, comm.our_connection_info()?);
+            let node = Node::new(keypair, comm.our_connection_info().await?);
             let state = Approved::first_node(node, config.network_params, event_tx)?;
 
             state.send_event(Event::Connected(Connected::First));
@@ -108,7 +108,7 @@ impl Routing {
             let (comm, bootstrap_addr) = Comm::from_bootstrapping(config.transport_config).await?;
             let mut incoming_msgs = comm.listen()?;
 
-            let node = Node::new(keypair, comm.our_connection_info()?);
+            let node = Node::new(keypair, comm.our_connection_info().await?);
             let (node, section) =
                 bootstrap::infant(node, &comm, &mut incoming_msgs, bootstrap_addr).await?;
             let state = Approved::new(node, section, None, config.network_params, event_tx);
@@ -158,8 +158,8 @@ impl Routing {
     }
 
     /// Returns connection info of this node.
-    pub fn our_connection_info(&self) -> Result<SocketAddr> {
-        self.stage.comm.our_connection_info()
+    pub async fn our_connection_info(&self) -> Result<SocketAddr> {
+        self.stage.comm.our_connection_info().await
     }
 
     /// Prefix of our section

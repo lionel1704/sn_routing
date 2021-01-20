@@ -7,7 +7,9 @@
 // permissions and limitations relating to use of the SAFE Network Software.
 
 use super::{bootstrap, Approved, Comm, Command};
-use crate::{error::Result, event::Event, messages::Message, relocation::SignedRelocateDetails};
+use crate::{
+    error::Result, event::Event, messages::Message, relocation::SignedRelocateDetails, Error,
+};
 use bytes::Bytes;
 use std::{net::SocketAddr, sync::Arc, time::Duration};
 use tokio::{
@@ -140,6 +142,9 @@ impl Stage {
             } => Ok(self
                 .send_message(&recipients, delivery_group_size, message)
                 .await),
+            Command::SendMessageToClient { recipient, message } => {
+                Ok(self.send_message_to_client(&recipient, message).await?)
+            }
             Command::SendUserMessage { src, dst, content } => {
                 self.state.lock().await.send_user_message(src, dst, content)
             }
@@ -166,6 +171,18 @@ impl Stage {
     // inside `handle_commands` causes compile error about type check cycle.
     fn spawn_handle_commands(self: Arc<Self>, command: Command) {
         let _ = tokio::spawn(self.handle_commands(command));
+    }
+
+    async fn send_message_to_client(
+        &self,
+        recipient: &SocketAddr,
+        message: Bytes,
+    ) -> Result<Vec<Command>> {
+        self.comm
+            .send_to_client(recipient, message)
+            .await
+            .map_err(|err| Error::Network(err))
+            .map(|()| Vec::new())
     }
 
     async fn send_message(

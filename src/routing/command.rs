@@ -60,6 +60,11 @@ pub(crate) enum Command {
         delivery_group_size: usize,
         message: Bytes,
     },
+    /// Send a message to a Client
+    SendMessageToClient {
+        recipient: SocketAddr,
+        message: Bytes,
+    },
     /// Send `UserMessage` with the given source and destination.
     SendUserMessage {
         src: SrcLocation,
@@ -149,6 +154,11 @@ impl Debug for Command {
                 .debug_struct("SendMessage")
                 .field("recipients", recipients)
                 .field("delivery_group_size", delivery_group_size)
+                .field("message", &format_args!("{:10}", hex_fmt::HexFmt(message)))
+                .finish(),
+            Self::SendMessageToClient { recipient, message } => f
+                .debug_struct("SendMessageToClient")
+                .field("recipient", recipient)
                 .field("message", &format_args!("{:10}", hex_fmt::HexFmt(message)))
                 .finish(),
             Self::SendUserMessage { src, dst, content } => f

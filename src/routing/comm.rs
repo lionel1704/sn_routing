@@ -179,6 +179,19 @@ impl Comm {
         (result, failed_recipients)
     }
 
+    pub async fn send_to_client(&self, addr: &SocketAddr, msg: Bytes) -> Result<(), qp2p::Error> {
+        if let Some(connection) = self.endpoint.get_existing_connection(addr) {
+            trace!("We have a connection. Sending message to {}", addr);
+            connection.send_uni(msg).await
+        } else {
+            error!(
+                "We don't have a connection to {}. Cannot send message",
+                addr
+            );
+            Err(qp2p::Error::NoConnection)
+        }
+    }
+
     // Low-level send
     async fn send_to(&self, recipient: &SocketAddr, msg: Bytes) -> Result<(), qp2p::Error> {
         let conn = self.connect_to(recipient).await?;

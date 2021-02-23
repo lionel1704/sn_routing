@@ -20,8 +20,9 @@ use crate::{
     crypto::{self, name, Verifier},
     error::{Error, Result},
     node::Node,
-    section::{ExtendError, SectionProofChain, TrustStatus},
+    section::{ExtendError, SectionKeyShare, SectionProofChain, TrustStatus},
 };
+use bls_signature_aggregator::ProofShare;
 use bytes::Bytes;
 use serde::{Deserialize, Serialize};
 use sn_messaging::DstLocation;
@@ -76,6 +77,16 @@ impl Message {
                     return Err(CreateError::FailedSignature);
                 }
             }
+            SrcAuthority::Partial { proof_share, .. } => {
+                if !proof_share
+                    .public_key_set
+                    .public_key_share(proof_share.index)
+                    .verify(&proof_share.signature_share, &signed_bytes)
+                {
+                    error!("Failed signature: {:?}", msg);
+                    return Err(CreateError::FailedSignature);
+                }
+            }
             SrcAuthority::Section { signature, .. } => {
                 if let Some(proof_chain) = msg.proof_chain.as_ref() {
                     // FIXME Assumes the nodes proof last key is the one signing this message
@@ -120,6 +131,45 @@ impl Message {
         msg.hash = MessageHash::from_bytes(&msg.serialized);
 
         Ok(msg)
+    }
+
+    /// Creates a message signed using a BLS KeyShare for
+    /// destination accumulation
+    pub(crate) fn for_dst_accumulation(
+        node: &Node,
+        key_share: &SectionKeyShare,
+        dst: DstLocation,
+        variant: Variant,
+        proof_chain: Option<SectionProofChain>,
+        dst_key: Option<bls::PublicKey>,
+    ) -> Result<Self, CreateError> {
+        let serialized = bincode::serialize(&SignableView {
+            dst: &dst,
+            dst_key: dst_key.as_ref(),
+            variant: &variant,
+        })?;
+        let signature_share = key_share.secret_key_share.sign(&serialized);
+        let proof_share = ProofShare {
+            public_key_set: key_share.public_key_set.clone(),
+            index: key_share.index,
+            signature_share,
+        };
+        let src = SrcAuthority::Partial {
+            proof_share,
+            public_key: node.keypair.public,
+            age: node.age,
+        };
+
+        Self::new_signed(src, dst, variant, proof_chain, dst_key)
+    }
+
+    pub(crate) fn signing_bytes(&self) -> Result<Vec<u8>> {
+        bincode::serialize(&SignableView {
+            dst: &self.dst,
+            dst_key: self.dst_key.as_ref(),
+            variant: &self.variant,
+        })
+        .map_err(From::from)
     }
 
     /// Creates a signed message from single node.
@@ -191,6 +241,17 @@ impl Message {
                     .filter(|(known_prefix, _)| known_prefix.matches(&name(public_key)))
                     .map(|(_, key)| key);
                 self.variant.verify(self.proof_chain.as_ref(), trusted_keys)
+            }
+            SrcAuthority::Partial { proof_share, .. } => {
+                if proof_share
+                    .public_key_set
+                    .public_key_share(proof_share.index)
+                    .verify(&proof_share.signature_share, &bytes)
+                {
+                    return Ok(VerifyStatus::Full); // Really?
+                } else {
+                    return Err(Error::FailedSignature);
+                }
             }
             SrcAuthority::Section { prefix, signature } => {
                 // Proof chain is required for section-src messages.

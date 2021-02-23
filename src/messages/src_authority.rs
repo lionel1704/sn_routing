@@ -11,6 +11,7 @@ use crate::{
     error::{Error, Result},
     peer::Peer,
 };
+use bls_signature_aggregator::ProofShare;
 use serde::{Deserialize, Serialize};
 use sn_messaging::SrcLocation;
 use std::net::SocketAddr;
@@ -32,6 +33,15 @@ pub enum SrcAuthority {
         /// ed-25519 signature of the message corresponding to the public key of the source peer.
         signature: SimpleSignature,
     },
+    /// Partial authority by signing with a key share
+    Partial {
+        /// Public key of the source peer.
+        public_key: PublicKey,
+        /// Age of the source peer.
+        age: u8,
+        /// Proof Share signed by the peer's BLS KeyShare
+        proof_share: ProofShare,
+    },
     /// Authority of a whole section.
     Section {
         /// Prefix of the source section.
@@ -45,6 +55,7 @@ impl SrcAuthority {
     pub(crate) fn src_location(&self) -> SrcLocation {
         match self {
             Self::Node { public_key, .. } => SrcLocation::Node(name(public_key)),
+            Self::Partial { public_key, .. } => SrcLocation::Node(name(public_key)),
             Self::Section { prefix, .. } => SrcLocation::Section(*prefix),
         }
     }
@@ -56,6 +67,7 @@ impl SrcAuthority {
     pub(crate) fn to_node_name(&self) -> Result<XorName> {
         match self {
             Self::Node { public_key, .. } => Ok(name(public_key)),
+            Self::Partial { public_key, .. } => Ok(name(public_key)),
             Self::Section { .. } => Err(Error::InvalidSrcLocation),
         }
     }
@@ -66,6 +78,9 @@ impl SrcAuthority {
             Self::Section { .. } => Err(Error::InvalidSrcLocation),
             Self::Node {
                 public_key, age, ..
+            }
+            | Self::Partial {
+                public_key, age, ..
             } => Ok(Peer::new(name(public_key), addr, *age)),
         }
     }
@@ -74,7 +89,7 @@ impl SrcAuthority {
     pub(crate) fn as_section_prefix(&self) -> Result<&Prefix> {
         match self {
             Self::Section { prefix, .. } => Ok(prefix),
-            Self::Node { .. } => Err(Error::InvalidSrcLocation),
+            _ => Err(Error::InvalidSrcLocation),
         }
     }
 }
